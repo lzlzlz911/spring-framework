@@ -104,6 +104,7 @@ public abstract class BeanDefinitionReaderUtils {
 			BeanDefinition definition, BeanDefinitionRegistry registry, boolean isInnerBean)
 			throws BeanDefinitionStoreException {
 
+		// 取 CLassName
 		String generatedBeanName = definition.getBeanClassName();
 		if (generatedBeanName == null) {
 			if (definition.getParentName() != null) {
@@ -119,11 +120,13 @@ public abstract class BeanDefinitionReaderUtils {
 		}
 
 		String id = generatedBeanName;
+		// 嵌套 Bean，Bean 里面的 Bean
 		if (isInnerBean) {
 			// Inner bean: generate identity hashcode suffix.
 			id = generatedBeanName + GENERATED_BEAN_NAME_SEPARATOR + ObjectUtils.getIdentityHexString(definition);
 		}
 		else {
+			// top bean，第一级的 Bean
 			// Top-level bean: use plain class name with unique suffix if necessary.
 			return uniqueBeanName(generatedBeanName, registry);
 		}
@@ -144,6 +147,7 @@ public abstract class BeanDefinitionReaderUtils {
 		int counter = -1;
 
 		// Increase counter until the id is unique.
+		// 确保 Bean 名称唯一，增加 counter 计数器
 		while (counter == -1 || registry.containsBeanDefinition(id)) {
 			counter++;
 			id = beanName + GENERATED_BEAN_NAME_SEPARATOR + counter;

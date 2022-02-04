@@ -1060,6 +1060,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		clearByTypeCache();
 	}
 
+	/**
+	 * 调用父类实现：super.destroySingletons()
+	 * @see DefaultSingletonBeanRegistry#destroySingletons()
+	 */
 	@Override
 	public void destroySingletons() {
 		super.destroySingletons();

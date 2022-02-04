@@ -39,6 +39,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.support.ResourceEditorRegistrar;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -1051,9 +1052,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 
 			// Destroy all cached singletons in the context's BeanFactory.
+			// 销毁 Bean
 			destroyBeans();
 
 			// Close the state of this context itself.
+			// 销毁 BeanFactory
 			closeBeanFactory();
 
 			// Let subclasses do some final clean-up if they wish...
@@ -1080,6 +1083,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * while the context's BeanFactory is still active.
 	 * @see #getBeanFactory()
 	 * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#destroySingletons()
+	 * 默认实现：
+	 * @see DefaultListableBeanFactory#destroySingletons()
 	 */
 	protected void destroyBeans() {
 		getBeanFactory().destroySingletons();

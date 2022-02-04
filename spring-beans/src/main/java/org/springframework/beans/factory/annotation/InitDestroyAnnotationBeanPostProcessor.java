@@ -118,6 +118,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 	 * <p>Any custom annotation can be used, since there are no required
 	 * annotation attributes. There is no default, although a typical choice
 	 * is the JSR-250 {@link javax.annotation.PostConstruct} annotation.
+	 * 使用：{@link InitDestroyAnnotationBeanPostProcessor#buildLifecycleMetadata(Class)}
 	 */
 	public void setInitAnnotationType(Class<? extends Annotation> initAnnotationType) {
 		this.initAnnotationType = initAnnotationType;
@@ -129,6 +130,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 	 * <p>Any custom annotation can be used, since there are no required
 	 * annotation attributes. There is no default, although a typical choice
 	 * is the JSR-250 {@link javax.annotation.PreDestroy} annotation.
+	 * * 使用：{@link InitDestroyAnnotationBeanPostProcessor#buildLifecycleMetadata(Class)}
 	 */
 	public void setDestroyAnnotationType(Class<? extends Annotation> destroyAnnotationType) {
 		this.destroyAnnotationType = destroyAnnotationType;
@@ -229,15 +231,20 @@ public class InitDestroyAnnotationBeanPostProcessor
 			final List<LifecycleElement> currInitMethods = new ArrayList<>();
 			final List<LifecycleElement> currDestroyMethods = new ArrayList<>();
 
+			// 循环当前 class 的方法
 			ReflectionUtils.doWithLocalMethods(targetClass, method -> {
+				// 查找 initAnnotationType 标记的 方法
 				if (this.initAnnotationType != null && method.isAnnotationPresent(this.initAnnotationType)) {
 					LifecycleElement element = new LifecycleElement(method);
+					// 把方法封装成 LifecycleElement 并储存
 					currInitMethods.add(element);
 					if (logger.isTraceEnabled()) {
 						logger.trace("Found init method on class [" + clazz.getName() + "]: " + method);
 					}
 				}
+				// 查找 destroyAnnotationType 标记的 方法
 				if (this.destroyAnnotationType != null && method.isAnnotationPresent(this.destroyAnnotationType)) {
+					/// 把方法封装成 LifecycleElement 并储存
 					currDestroyMethods.add(new LifecycleElement(method));
 					if (logger.isTraceEnabled()) {
 						logger.trace("Found destroy method on class [" + clazz.getName() + "]: " + method);
@@ -245,12 +252,15 @@ public class InitDestroyAnnotationBeanPostProcessor
 				}
 			});
 
+			// 初始化方法，父类早与子类
 			initMethods.addAll(0, currInitMethods);
+			// 销毁方法，父类晚与子类
 			destroyMethods.addAll(currDestroyMethods);
 			targetClass = targetClass.getSuperclass();
 		}
 		while (targetClass != null && targetClass != Object.class);
 
+		// 封装 LifecycleMetadata 对象
 		return (initMethods.isEmpty() && destroyMethods.isEmpty() ? this.emptyLifecycleMetadata :
 				new LifecycleMetadata(clazz, initMethods, destroyMethods));
 	}
@@ -321,6 +331,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 			this.checkedDestroyMethods = checkedDestroyMethods;
 		}
 
+		// initMehthods 执行
 		public void invokeInitMethods(Object target, String beanName) throws Throwable {
 			Collection<LifecycleElement> checkedInitMethods = this.checkedInitMethods;
 			Collection<LifecycleElement> initMethodsToIterate =
@@ -335,6 +346,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 			}
 		}
 
+		// destroyMethods 执行
 		public void invokeDestroyMethods(Object target, String beanName) throws Throwable {
 			Collection<LifecycleElement> checkedDestroyMethods = this.checkedDestroyMethods;
 			Collection<LifecycleElement> destroyMethodsToUse =

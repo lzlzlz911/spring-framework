@@ -274,6 +274,7 @@ public abstract class ClassUtils {
 			clToUse = getDefaultClassLoader();
 		}
 		try {
+			// class 加载
 			return Class.forName(name, false, clToUse);
 		}
 		catch (ClassNotFoundException ex) {

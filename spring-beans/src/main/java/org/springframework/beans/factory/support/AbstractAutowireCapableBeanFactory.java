@@ -516,6 +516,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		try {
+			// 实例化 bean 对象
 			Object beanInstance = doCreateBean(beanName, mbdToUse, args);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Finished creating instance of bean '" + beanName + "'");
@@ -556,6 +557,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
 		}
 		if (instanceWrapper == null) {
+			// 实例化 bean
 			instanceWrapper = createBeanInstance(beanName, mbd, args);
 		}
 		final Object bean = instanceWrapper.getWrappedInstance();
@@ -1213,6 +1215,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		// No special handling: simply use no-arg constructor.
+		// 无参构造器 实例化
 		return instantiateBean(beanName, mbd);
 	}
 
@@ -1311,9 +1314,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 						getAccessControlContext());
 			}
 			else {
+				/**
+				 * 获取实例化策略类，默认为 {@link CglibSubclassingInstantiationStrategy}
+				 * {@link CglibSubclassingInstantiationStrategy} 继承 {@link SimpleInstantiationStrategy}
+				 * 调用 {@link SimpleInstantiationStrategy#instantiate(RootBeanDefinition, String, BeanFactory, Constructor, Object...)} 实例化 bean
+				 */
 				beanInstance = getInstantiationStrategy().instantiate(mbd, beanName, parent);
 			}
+			// 包装 bean
 			BeanWrapper bw = new BeanWrapperImpl(beanInstance);
+			// 初始化 beanWrapper
 			initBeanWrapper(bw);
 			return bw;
 		}

@@ -505,6 +505,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		try {
 			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
+			/**
+			 * 在 bean 实例化之前，检查是否有 注册 的 BeanPostProcessor 对象，用来处理 bean 实例
+			 * @see InstantiationAwareBeanPostProcessor#postProcessBeforeInstantiation
+			 * @see BeanPostProcessor#postProcessAfterInitialization(Object, String) 
+			 */
 			Object bean = resolveBeforeInstantiation(beanName, mbdToUse);
 			if (bean != null) {
 				return bean;
@@ -1115,8 +1120,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 				Class<?> targetType = determineTargetType(beanName, mbd);
 				if (targetType != null) {
+					// 使用注册的 InstantiationAwareBeanPostProcessor 处理
 					bean = applyBeanPostProcessorsBeforeInstantiation(targetType, beanName);
 					if (bean != null) {
+						// 使用注册的 BeanPostProcessor 处理
 						bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
 					}
 				}

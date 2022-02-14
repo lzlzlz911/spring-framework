@@ -601,7 +601,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		Object exposedObject = bean;
 		try {
 			/**
-			 * 对 bean 进行后置处理
+			 * 对 bean definition 的属性进行前置和后置处理
 			 * @see InstantiationAwareBeanPostProcessor#postProcessAfterInstantiation(Object, String)
 			 */
 			populateBean(beanName, mbd, instanceWrapper);

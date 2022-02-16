@@ -605,6 +605,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			 * @see InstantiationAwareBeanPostProcessor#postProcessAfterInstantiation(Object, String)
 			 */
 			populateBean(beanName, mbd, instanceWrapper);
+
+			/**
+			 * spring bean 初始化
+			 */
 			exposedObject = initializeBean(beanName, exposedObject, mbd);
 		}
 		catch (Throwable ex) {
@@ -1815,15 +1819,34 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}, getAccessControlContext());
 		}
 		else {
+			// BeanNameAware BeanClassLoaderAware BeanFactoryAware 接口回调
 			invokeAwareMethods(beanName, bean);
 		}
 
 		Object wrappedBean = bean;
 		if (mbd == null || !mbd.isSynthetic()) {
+			/**
+			 * @see BeanPostProcessor#postProcessBeforeInitialization(Object, String) 接口回调
+			 *
+			 * 同时，包含了 EnvironmentAware EmbeddedValueResolverAware ResourceLoaderAware
+			 * ApplicationEventPublisherAware MessageSourceAware ApplicationContextAware 的接口回调
+			 * @see ApplicationContextAwareProcessor#postProcessBeforeInitialization(Object bean, String beanName)
+			 *
+			 * 同时，包含了 {@link javax.annotation.PostConstruct} 的处理
+			 * CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBeanPostProcessor
+			 * InitDestroyAnnotationBeanPostProcessor order 优先级设置为 Ordered.LOWEST_PRECEDENCE 最低
+			 * @see InitDestroyAnnotationBeanPostProcessor#postProcessBeforeInitialization(Object bean, String beanName)
+			 */
 			wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
 		}
 
 		try {
+			/**
+			 * 初始化方法的回调
+			 * {@link javax.annotation.PostConstruct} 的处理在上面的 applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName)
+			 * @see InitializingBean#afterPropertiesSet()
+			 * @see AbstractAutowireCapableBeanFactory#invokeCustomInitMethod(String, Object, RootBeanDefinition)
+			 */
 			invokeInitMethods(beanName, wrappedBean, mbd);
 		}
 		catch (Throwable ex) {
@@ -1831,6 +1854,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					(mbd != null ? mbd.getResourceDescription() : null),
 					beanName, "Invocation of init method failed", ex);
 		}
+
+		/**
+		 * @see BeanPostProcessor#postProcessAfterInitialization(Object, String)  接口回调
+		 */
 		if (mbd == null || !mbd.isSynthetic()) {
 			wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
 		}
@@ -1870,6 +1897,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	protected void invokeInitMethods(String beanName, final Object bean, @Nullable RootBeanDefinition mbd)
 			throws Throwable {
 
+		// 如果 bean 实现了 InitializingBean 接口，则回调 afterPropertiesSet() 方法
 		boolean isInitializingBean = (bean instanceof InitializingBean);
 		if (isInitializingBean && (mbd == null || !mbd.isExternallyManagedInitMethod("afterPropertiesSet"))) {
 			if (logger.isTraceEnabled()) {
@@ -1887,10 +1915,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				}
 			}
 			else {
+				// 回调 afterPropertiesSet() 方法
 				((InitializingBean) bean).afterPropertiesSet();
 			}
 		}
 
+		// 如果定义了 init-method，则进行方法的回调
 		if (mbd != null && bean.getClass() != NullBean.class) {
 			String initMethodName = mbd.getInitMethodName();
 			if (StringUtils.hasLength(initMethodName) &&

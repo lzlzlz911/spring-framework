@@ -1083,6 +1083,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * while the context's BeanFactory is still active.
 	 * @see #getBeanFactory()
 	 * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#destroySingletons()
+	 *
 	 * 默认实现：
 	 * @see DefaultListableBeanFactory#destroySingletons()
 	 */

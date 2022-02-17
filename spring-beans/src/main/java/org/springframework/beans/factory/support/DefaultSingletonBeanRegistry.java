@@ -363,6 +363,11 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * @param bean the bean instance
 	 */
 	public void registerDisposableBean(String beanName, DisposableBean bean) {
+		/**
+		 * 添加 销毁 对象
+		 * 执行销毁具体参考
+		 * @see org.springframework.context.support.AbstractApplicationContext#destroyBeans()
+		 */
 		synchronized (this.disposableBeans) {
 			this.disposableBeans.put(beanName, bean);
 		}
@@ -497,6 +502,11 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 		}
 
 		String[] disposableBeanNames;
+		/**
+		 * 获得 要 销毁 的 bean 集合
+		 * this.disposableBeans 在 {@link AbstractAutowireCapableBeanFactory#doCreateBean(String, RootBeanDefinition, Object[])}
+		 * 方法中 进行 bean 的 注册
+ 		 */
 		synchronized (this.disposableBeans) {
 			disposableBeanNames = StringUtils.toStringArray(this.disposableBeans.keySet());
 		}
@@ -534,13 +544,17 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	public void destroySingleton(String beanName) {
 		// Remove a registered singleton of the given name, if any.
+		// 从 bean factory 移除 bean 实例
 		removeSingleton(beanName);
 
 		// Destroy the corresponding DisposableBean instance.
+		// 从 disposableBeans 中移除 bean
 		DisposableBean disposableBean;
 		synchronized (this.disposableBeans) {
 			disposableBean = (DisposableBean) this.disposableBeans.remove(beanName);
 		}
+
+		// bean 实例 销毁
 		destroyBean(beanName, disposableBean);
 	}
 

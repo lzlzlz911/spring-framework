@@ -93,6 +93,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	@Override
 	public void registerBeanDefinitions(Document doc, XmlReaderContext readerContext) {
 		this.readerContext = readerContext;
+		// 核心方法
 		doRegisterBeanDefinitions(doc.getDocumentElement());
 	}
 
@@ -145,8 +146,13 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 			}
 		}
 
+		// 前置处理
 		preProcessXml(root);
+
+		// 解析
 		parseBeanDefinitions(root, this.delegate);
+
+		// 后置处理
 		postProcessXml(root);
 
 		this.delegate = parent;

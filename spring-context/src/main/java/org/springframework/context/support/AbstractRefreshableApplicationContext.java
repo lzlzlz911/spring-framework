@@ -127,9 +127,18 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 			closeBeanFactory();
 		}
 		try {
+			// 创建 内部 的 bean factory
 			DefaultListableBeanFactory beanFactory = createBeanFactory();
 			beanFactory.setSerializationId(getId());
 			customizeBeanFactory(beanFactory);
+			/**
+			 * 加载 bean definition 定义
+			 * 主要 实现 有
+			 * xml、annotation、groovy
+			 *
+			 * xml 实现
+			 * @see AbstractXmlApplicationContext#loadBeanDefinitions(DefaultListableBeanFactory)
+			 */
 			loadBeanDefinitions(beanFactory);
 			synchronized (this.beanFactoryMonitor) {
 				this.beanFactory = beanFactory;

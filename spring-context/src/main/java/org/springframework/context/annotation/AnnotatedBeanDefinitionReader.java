@@ -52,8 +52,10 @@ public class AnnotatedBeanDefinitionReader {
 
 	private BeanNameGenerator beanNameGenerator = AnnotationBeanNameGenerator.INSTANCE;
 
+	// Bean 范围解析
 	private ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
 
+	// 条件评估
 	private ConditionEvaluator conditionEvaluator;
 
 

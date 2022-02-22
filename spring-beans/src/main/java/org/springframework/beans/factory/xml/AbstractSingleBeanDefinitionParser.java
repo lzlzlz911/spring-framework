@@ -60,6 +60,7 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 	 */
 	@Override
 	protected final AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
+		// 构造 BeanDefinition
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition();
 		String parentName = getParentName(element);
 		if (parentName != null) {
@@ -85,6 +86,13 @@ public abstract class AbstractSingleBeanDefinitionParser extends AbstractBeanDef
 			// Default-lazy-init applies to custom bean definitions as well.
 			builder.setLazyInit(true);
 		}
+		// xml 元素 解析
+		// 对 配置文件 的 自定义 元素 属性 进行 解析
+		// 解析类 的 注册 通过 继承 NamespaceHandlerSupport 类
+		// 并对 init() 方法 进行 重写，在 init() 方法 中 注册 元素 的 处理类
+		// NamespaceHandler 的 子类，由 前面 的 Namespace 解析 所 决定
+		// @see spring.handlers
+		// @see spring.schemas
 		doParse(element, parserContext, builder);
 		return builder.getBeanDefinition();
 	}

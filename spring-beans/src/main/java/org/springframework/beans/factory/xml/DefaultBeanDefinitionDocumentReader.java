@@ -179,9 +179,13 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 				if (node instanceof Element) {
 					Element ele = (Element) node;
 					if (delegate.isDefaultNamespace(ele)) {
+						// 默认 元素 处理 import、alias、bean、beans
 						parseDefaultElement(ele, delegate);
 					}
 					else {
+						// 自定义 和 扩展 元素 处理
+						// @see META_INF/spring.schema
+						// @see META_INF/spring.handler
 						delegate.parseCustomElement(ele);
 					}
 				}

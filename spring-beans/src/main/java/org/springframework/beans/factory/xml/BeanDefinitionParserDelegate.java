@@ -1368,6 +1368,7 @@ public class BeanDefinitionParserDelegate {
 	 */
 	@Nullable
 	public BeanDefinition parseCustomElement(Element ele) {
+		// 处理
 		return parseCustomElement(ele, null);
 	}
 
@@ -1379,15 +1380,20 @@ public class BeanDefinitionParserDelegate {
 	 */
 	@Nullable
 	public BeanDefinition parseCustomElement(Element ele, @Nullable BeanDefinition containingBd) {
+		// 解析 元素 的 namespace
 		String namespaceUri = getNamespaceURI(ele);
 		if (namespaceUri == null) {
 			return null;
 		}
+		// 根据 元素 的 namespace 解析 元素 注册 的 处理类(NamespaceHandler)
+		// @see META_INF/spring.handler
 		NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 		if (handler == null) {
 			error("Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]", ele);
 			return null;
 		}
+		// 处理 核心 方法
+		// @see NamespaceHandlerSupport#(Element element, ParserContext parserContext)
 		return handler.parse(ele, new ParserContext(this.readerContext, this, containingBd));
 	}
 

@@ -122,6 +122,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 */
 	@Override
 	protected final void refreshBeanFactory() throws BeansException {
+		// 如果存在 BeanFactory，则 销毁 或 关闭 BeanFactory
 		if (hasBeanFactory()) {
 			destroyBeans();
 			closeBeanFactory();
@@ -140,6 +141,8 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 			 * @see AbstractXmlApplicationContext#loadBeanDefinitions(DefaultListableBeanFactory)
 			 */
 			loadBeanDefinitions(beanFactory);
+
+			// 关联 新建的 BeanFactory 到 Spring 应用 上下文
 			synchronized (this.beanFactoryMonitor) {
 				this.beanFactory = beanFactory;
 			}
@@ -231,9 +234,11 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 * @see DefaultListableBeanFactory#setAllowEagerClassLoading
 	 */
 	protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory) {
+		// 是否 允许 BeanDefinition 重复定义
 		if (this.allowBeanDefinitionOverriding != null) {
 			beanFactory.setAllowBeanDefinitionOverriding(this.allowBeanDefinitionOverriding);
 		}
+		// 是否 允许 循环 引用（依赖）
 		if (this.allowCircularReferences != null) {
 			beanFactory.setAllowCircularReferences(this.allowCircularReferences);
 		}

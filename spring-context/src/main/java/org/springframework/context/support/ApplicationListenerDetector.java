@@ -60,6 +60,8 @@ class ApplicationListenerDetector implements DestructionAwareBeanPostProcessor, 
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		if (ApplicationListener.class.isAssignableFrom(beanType)) {
+			// MergedBeanDefinition 之后的 Bean 如果是 ApplicationListener
+			// 则将 beanName 和 isSingleton（是否单例） 存入 Map
 			this.singletonNames.put(beanName, beanDefinition.isSingleton());
 		}
 	}
@@ -76,6 +78,7 @@ class ApplicationListenerDetector implements DestructionAwareBeanPostProcessor, 
 			Boolean flag = this.singletonNames.get(beanName);
 			if (Boolean.TRUE.equals(flag)) {
 				// singleton bean (top-level or inner): register on the fly
+				// 在
 				this.applicationContext.addApplicationListener((ApplicationListener<?>) bean);
 			}
 			else if (Boolean.FALSE.equals(flag)) {

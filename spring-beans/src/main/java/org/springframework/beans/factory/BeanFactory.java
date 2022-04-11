@@ -120,6 +120,9 @@ public interface BeanFactory {
 	 * beans <i>created</i> by the FactoryBean. For example, if the bean named
 	 * {@code myJndiObject} is a FactoryBean, getting {@code &myJndiObject}
 	 * will return the factory, not the instance returned by the factory.
+	 * 对 FactoryBean 的 转义定义
+	 * 如果使用 Bean 的名字 检索 FactoryBean 得到的对象是 工厂生成的 对象
+	 * 如果 需要得到 工厂本身，需要转义
 	 */
 	String FACTORY_BEAN_PREFIX = "&";
 
@@ -131,6 +134,7 @@ public interface BeanFactory {
 	 * returned objects in the case of Singleton beans.
 	 * <p>Translates aliases back to the corresponding canonical bean name.
 	 * Will ask the parent factory if the bean cannot be found in this factory instance.
+	 * 根据 Bean 的名字，从 IoC 容器中 检索 Bean 实例
 	 * @param name the name of the bean to retrieve
 	 * @return an instance of the bean
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the specified name
@@ -146,6 +150,7 @@ public interface BeanFactory {
 	 * the result correctly, as can happen with {@link #getBean(String)}.
 	 * <p>Translates aliases back to the corresponding canonical bean name.
 	 * Will ask the parent factory if the bean cannot be found in this factory instance.
+	 * 根据 Bean 的名字 和 Class 类型 来检索 Bean 实例，增加了 类型安全 验证 机制
 	 * @param name the name of the bean to retrieve
 	 * @param requiredType type the bean must match; can be an interface or superclass
 	 * @return an instance of the bean
@@ -245,6 +250,7 @@ public interface BeanFactory {
 	 * or abstract, lazy or eager, in scope or not. Therefore, note that a {@code true}
 	 * return value from this method does not necessarily indicate that {@link #getBean}
 	 * will be able to obtain an instance for the same name.
+	 * 提供对 Bean 的检索，看看在 IoC 容器中 是否有提供名字的 Bean
 	 * @param name the name of the bean to query
 	 * @return whether a bean with the given name is present
 	 */
@@ -259,6 +265,7 @@ public interface BeanFactory {
 	 * check for independent instances.
 	 * <p>Translates aliases back to the corresponding canonical bean name.
 	 * Will ask the parent factory if the bean cannot be found in this factory instance.
+	 * 根据 Bean 的名字 检索 Bean 实例，同时 判断 这个 Bean 是不是单例
 	 * @param name the name of the bean to query
 	 * @return whether this bean corresponds to a singleton instance
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
@@ -327,6 +334,7 @@ public interface BeanFactory {
 	 * of a previously uninitialized {@code FactoryBean} (see {@link #getType(String, boolean)}).
 	 * <p>Translates aliases back to the corresponding canonical bean name.
 	 * Will ask the parent factory if the bean cannot be found in this factory instance.
+	 * 检索 Bean 实例的 Class 类型
 	 * @param name the name of the bean to query
 	 * @return the type of the bean, or {@code null} if not determinable
 	 * @throws NoSuchBeanDefinitionException if there is no bean with the given name
@@ -365,6 +373,7 @@ public interface BeanFactory {
 	 * and other aliases (if any) will be returned, with the original bean name
 	 * being the first element in the array.
 	 * <p>Will ask the parent factory if the bean cannot be found in this factory instance.
+	 * 检索 Bean 的别名，如果 根据 别名 检索，那么其原名也会被 检索出来
 	 * @param name the bean name to check for aliases
 	 * @return the aliases, or an empty array if none
 	 * @see #getBean

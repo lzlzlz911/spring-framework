@@ -1039,6 +1039,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			// We've already explicitly closed the context.
 			if (this.shutdownHook != null) {
 				try {
+					// 撤销 Shutdown Hook 线程
 					Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
 				}
 				catch (IllegalStateException ex) {
@@ -1059,15 +1060,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void doClose() {
 		// Check whether an actual close attempt is necessary...
+		// closed 状态位 标识
 		if (this.active.get() && this.closed.compareAndSet(false, true)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Closing " + this);
 			}
 
+			// Live Beans JMX 撤销托管
 			LiveBeansView.unregisterApplicationContext(this);
 
 			try {
 				// Publish shutdown event.
+				// 发布 Spring 应用上下文 已关闭事件
 				publishEvent(new ContextClosedEvent(this));
 			}
 			catch (Throwable ex) {
@@ -1077,6 +1081,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			// Stop all Lifecycle beans, to avoid delays during individual destruction.
 			if (this.lifecycleProcessor != null) {
 				try {
+					// 停止 Lifecycle Beans
 					this.lifecycleProcessor.onClose();
 				}
 				catch (Throwable ex) {
@@ -1093,6 +1098,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			closeBeanFactory();
 
 			// Let subclasses do some final clean-up if they wish...
+			// 回调 onClose
 			onClose();
 
 			// Reset local application listeners to pre-refresh state.
@@ -1102,6 +1108,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 
 			// Switch to inactive.
+			// active 状态位 状态标识
 			this.active.set(false);
 		}
 	}
@@ -1424,13 +1431,17 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	@Override
 	public void start() {
+		// 启动 LifecycleProcessor
 		getLifecycleProcessor().start();
+		// 发布 Spring 应用上下文 已启动事件
 		publishEvent(new ContextStartedEvent(this));
 	}
 
 	@Override
 	public void stop() {
+		// 停止 LifecycleProcessor
 		getLifecycleProcessor().stop();
+		// 发布 Spring 应用上下文 已停止事件
 		publishEvent(new ContextStoppedEvent(this));
 	}
 

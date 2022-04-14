@@ -156,6 +156,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	static {
 		// Eagerly load the ContextClosedEvent class to avoid weird classloader issues
 		// on application shutdown in WebLogic 8.1. (Reported by Dustin Woods.)
+		// 为了 避免 应用程序 在 WebLogic 8.1 关闭时 出现 类加载器 异常问题
+		// 加载 IoC 容器关闭事件类
 		ContextClosedEvent.class.getName();
 	}
 
@@ -451,11 +453,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * <p><b>Do not call this when needing to resolve a location pattern.</b>
 	 * Call the context's {@code getResources} method instead, which
 	 * will delegate to the ResourcePatternResolver.
+	 * 获取 一个 Spring Source 的 加载器 用于 读入 Spring Bean 配置信息
 	 * @return the ResourcePatternResolver for this context
 	 * @see #getResources
 	 * @see org.springframework.core.io.support.PathMatchingResourcePatternResolver
 	 */
 	protected ResourcePatternResolver getResourcePatternResolver() {
+		// AbstractApplicationContext 继承 DefaultResourceLoader，因此也是一个 资源加载器
+		// Spring 资源加载器的 getResource(String location) 方法 用于载入资源
 		return new PathMatchingResourcePatternResolver(this);
 	}
 

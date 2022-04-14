@@ -328,8 +328,10 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 					"Detected cyclic loading of " + encodedResource + " - check your import definitions!");
 		}
 		try {
+			// 将 资源文件 转为 InputStream 的 I/O 流
 			InputStream inputStream = encodedResource.getResource().getInputStream();
 			try {
+				// 从 InputStream 中得到 XML 的解析源
 				InputSource inputSource = new InputSource(inputStream);
 				if (encodedResource.getEncoding() != null) {
 					inputSource.setEncoding(encodedResource.getEncoding());
@@ -338,6 +340,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 				return doLoadBeanDefinitions(inputSource, encodedResource.getResource());
 			}
 			finally {
+				// 关闭从 Resource 中得到的 I/O 流
 				inputStream.close();
 			}
 		}
@@ -396,6 +399,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 			// javax.xml、org.w3c.dom
 			Document doc = doLoadDocument(inputSource, resource);
 			// 2. 注册 bean definitions
+			// 启动对 Bean 定义解析的 详细过程，该 解析过程 会用到 Spring 的 Bean 配置规则
 			// @see DefaultBeanDefinitionDocumentReader#doRegisterBeanDefinitions(Element root)
 			int count = registerBeanDefinitions(doc, resource);
 			if (logger.isDebugEnabled()) {
@@ -515,11 +519,16 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @see BeanDefinitionDocumentReader#registerBeanDefinitions
 	 */
 	public int registerBeanDefinitions(Document doc, Resource resource) throws BeanDefinitionStoreException {
+		// 创建 BeanDefinitionDocumentReader 对象 来对 XML 格式的 BeanDefinition 进行解析
 		BeanDefinitionDocumentReader documentReader = createBeanDefinitionDocumentReader();
+		// 获得 容器中 注册的 Bean 数量
 		int countBefore = getRegistry().getBeanDefinitionCount();
 		// 注册 bean definitions
+		// 解析过程的 入口，这里使用了 委派模式，BeanDefinitionDocumentReader 只是一个接口
+		// 具体的 解析过程 由 实现类 DefaultBeanDefinitionDocumentReader 完成
 		// @see DefaultBeanDefinitionDocumentReader#doRegisterBeanDefinitions(Element root)
 		documentReader.registerBeanDefinitions(doc, createReaderContext(resource));
+		// 返回 解析到的 Bean 的数量
 		return getRegistry().getBeanDefinitionCount() - countBefore;
 	}
 

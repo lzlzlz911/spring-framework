@@ -81,16 +81,22 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableC
 	protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) throws BeansException, IOException {
 		// Create a new XmlBeanDefinitionReader for the given BeanFactory.
 		// 创建 XmlBeanDefinitionReader 对象、决策 资源 和 环境 的 处理 者
+		// 容器 使用 该 读取器 读取 Bean 配置资源
 		XmlBeanDefinitionReader beanDefinitionReader = new XmlBeanDefinitionReader(beanFactory);
 
 		// Configure the bean definition reader with this context's
 		// resource loading environment.
+		// 为 Bean 读取器 设置 Spring 资源加载器
+		// AbstractXmlApplicationContext 的祖先父类 AbstractApplicationContext 继承 DefaultResourceLoader
+		// 因此 容器 本身 也是一个 资源加载器
 		beanDefinitionReader.setEnvironment(this.getEnvironment());
 		beanDefinitionReader.setResourceLoader(this);
+		// 为 Bean 读取器 设置 SAX XML 解析器
 		beanDefinitionReader.setEntityResolver(new ResourceEntityResolver(this));
 
 		// Allow a subclass to provide custom initialization of the reader,
 		// then proceed with actually loading the bean definitions.
+		// 当 Bean 读取器 读取 Bean 定义的 xml 资源文件时，启用 xml 的校验机制
 		initBeanDefinitionReader(beanDefinitionReader);
 
 		// 加载 bean definition
@@ -122,14 +128,19 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableC
 	 * @see #getResourcePatternResolver
 	 */
 	protected void loadBeanDefinitions(XmlBeanDefinitionReader reader) throws BeansException, IOException {
+		// 获取 Bean 配置资源的 定位
 		Resource[] configResources = getConfigResources();
 		if (configResources != null) {
 			// load bean definition by resource
+			// xml Bean 读取器 调用其父类 AbstractBeanDefinitionReader 读取定位的 Bean 配置资源
 			reader.loadBeanDefinitions(configResources);
 		}
+		// 如果 子类中 获取的 Bean 配置 资源定位为空
+		// 则 获取 ClassPathXmlApplicationContext 构造方法中 setConfigLocations 方法 设置的 资源
 		String[] configLocations = getConfigLocations();
 		if (configLocations != null) {
 			// load bean definition by location
+			// xml Bean 读取器调用其 父类 AbstractBeanDefinitionReader 读取定位的 Bean 配置资源
 			reader.loadBeanDefinitions(configLocations);
 		}
 	}
@@ -139,6 +150,9 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableC
 	 * files that this context should be built with.
 	 * <p>The default implementation returns {@code null}. Subclasses can override
 	 * this to provide pre-built Resource objects rather than location Strings.
+	 * 这里又使用了一个委派模式，调用子类的获取 Bean 的配置资源定位的方法
+	 * 该方法在 ClassPathXmlApplicationContext 中实现
+	 * 我们举例分析源码的 ClassPathXmlApplicationContext 没有使用该方法
 	 * @return an array of Resource objects, or {@code null} if none
 	 * @see #getConfigLocations()
 	 */

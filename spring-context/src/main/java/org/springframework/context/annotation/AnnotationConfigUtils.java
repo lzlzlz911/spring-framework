@@ -230,15 +230,22 @@ public abstract class AnnotationConfigUtils {
 		}
 	}
 
+	/**
+	 * 通用注解 处理
+	 * @param abd AnnotatedBeanDefinition
+	 */
 	public static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition abd) {
 		processCommonDefinitionAnnotations(abd, abd.getMetadata());
 	}
 
 	static void processCommonDefinitionAnnotations(AnnotatedBeanDefinition abd, AnnotatedTypeMetadata metadata) {
 		AnnotationAttributes lazy = attributesFor(metadata, Lazy.class);
+		// @Lazy 注解 处理
 		if (lazy != null) {
 			abd.setLazyInit(lazy.getBoolean("value"));
 		}
+		// 判断 传入的 metadata 对象 和 beanDefinition 对象 的 metadata 对象是否 是同一个对象
+		// 如果不是 同一个对象，则再次从 beanDefinition 的 metadata 中 查找 lazy 属性
 		else if (abd.getMetadata() != metadata) {
 			lazy = attributesFor(abd.getMetadata(), Lazy.class);
 			if (lazy != null) {
@@ -246,18 +253,25 @@ public abstract class AnnotationConfigUtils {
 			}
 		}
 
+		// @Primary 注解 处理
 		if (metadata.isAnnotated(Primary.class.getName())) {
 			abd.setPrimary(true);
 		}
+
+		// @DependsOn 注解 处理
+		// 容器 将 确保 在实例化该 Bean 之前 首先 实例化 依赖的 Bean
 		AnnotationAttributes dependsOn = attributesFor(metadata, DependsOn.class);
 		if (dependsOn != null) {
 			abd.setDependsOn(dependsOn.getStringArray("value"));
 		}
 
+		// @Role 注解 处理
 		AnnotationAttributes role = attributesFor(metadata, Role.class);
 		if (role != null) {
 			abd.setRole(role.getNumber("value").intValue());
 		}
+
+		// @Description 注解 处理
 		AnnotationAttributes description = attributesFor(metadata, Description.class);
 		if (description != null) {
 			abd.setDescription(description.getString("value"));
@@ -267,11 +281,18 @@ public abstract class AnnotationConfigUtils {
 	static BeanDefinitionHolder applyScopedProxyMode(
 			ScopeMetadata metadata, BeanDefinitionHolder definition, BeanDefinitionRegistry registry) {
 
+		// 获取 proxyMode 属性值
 		ScopedProxyMode scopedProxyMode = metadata.getScopedProxyMode();
+		// 如果 proxyMode 为 No，则 不应用 代理模式
 		if (scopedProxyMode.equals(ScopedProxyMode.NO)) {
 			return definition;
 		}
+
+		// 获取 配置的 @Scope 注解的 proxyMode 属性值
+		// ScopedProxyMode.TARGET_CLASS -> proxyTargetClass=true
+		// ScopedProxyMode.INTERFACES   -> proxyTargetClass=false
 		boolean proxyTargetClass = scopedProxyMode.equals(ScopedProxyMode.TARGET_CLASS);
+		// 为 注册的 Bean 创建 相应模式的 代理对象
 		return ScopedProxyCreator.createScopedProxy(definition, registry, proxyTargetClass);
 	}
 

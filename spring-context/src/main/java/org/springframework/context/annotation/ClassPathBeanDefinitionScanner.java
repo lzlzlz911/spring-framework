@@ -160,12 +160,15 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 			Environment environment, @Nullable ResourceLoader resourceLoader) {
 
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
+		// 设置容器的 BeanDefinitionRegistry
 		this.registry = registry;
 
 		if (useDefaultFilters) {
 			registerDefaultFilters();
 		}
+		// 设置容器的 Environment
 		setEnvironment(environment);
+		// 设置容器的 ResourceLoader
 		setResourceLoader(resourceLoader);
 	}
 
@@ -249,8 +252,10 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @return number of beans registered
 	 */
 	public int scan(String... basePackages) {
+		// 当前 容器中 已注册 Bean 的 数量
 		int beanCountAtScanStart = this.registry.getBeanDefinitionCount();
 
+		// * 扫描包 *
 		doScan(basePackages);
 
 		// Register annotation config processors, if necessary.
@@ -258,6 +263,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 			AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 		}
 
+		// 返回 新注册 的 Bean 的 个数
 		return (this.registry.getBeanDefinitionCount() - beanCountAtScanStart);
 	}
 
@@ -272,23 +278,36 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
 		Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
+		// 遍历 package
 		for (String basePackage : basePackages) {
+			// * 调用 父类方法 执行 扫描操作 *
 			Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
+			// 遍历 bean
 			for (BeanDefinition candidate : candidates) {
+				// Scope 作用域 解析
 				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
+				// 设置 作用域
 				candidate.setScope(scopeMetadata.getScopeName());
+
+				// bean 名称 生成
 				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
+
+				// bean 非 AnnotatedBeanDefinition，设置 Bean 的 自动依赖注入装配属性 等
 				if (candidate instanceof AbstractBeanDefinition) {
 					postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
 				}
+				// bean 是 AnnotatedBeanDefinition，处理 通用注解
 				if (candidate instanceof AnnotatedBeanDefinition) {
 					AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition) candidate);
 				}
+				// 检测 bean 是否 需要在 容器中 注册，或者 是否 在 容器中 存在冲突
 				if (checkCandidate(beanName, candidate)) {
 					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
+					// 根据 注解 Bean 定义类中 配置的 作用域，创建相应的 代理对象
 					definitionHolder =
 							AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
 					beanDefinitions.add(definitionHolder);
+					// 向 IoC 容器 注册 注解 BeanDefinition
 					registerBeanDefinition(definitionHolder, this.registry);
 				}
 			}

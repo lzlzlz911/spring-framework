@@ -144,6 +144,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 */
 	public ClassPathScanningCandidateComponentProvider(boolean useDefaultFilters, Environment environment) {
 		if (useDefaultFilters) {
+			// 使用默认规则
 			registerDefaultFilters();
 		}
 		setEnvironment(environment);
@@ -204,9 +205,13 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 */
 	@SuppressWarnings("unchecked")
 	protected void registerDefaultFilters() {
+		// 向要包含的 过滤规则中 添加 @Component 注解类，注意 Spring 中 @Repository
+		// @Service 和 @Controller 都是 @Component
 		this.includeFilters.add(new AnnotationTypeFilter(Component.class));
+		// 获取 类加载器
 		ClassLoader cl = ClassPathScanningCandidateComponentProvider.class.getClassLoader();
 		try {
+			// 向要包含的 过滤规则中 添加 Java EE 6 的 @ManagedBean 注解
 			this.includeFilters.add(new AnnotationTypeFilter(
 					((Class<? extends Annotation>) ClassUtils.forName("javax.annotation.ManagedBean", cl)), false));
 			logger.trace("JSR-250 'javax.annotation.ManagedBean' found and supported for component scanning");
@@ -215,6 +220,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 			// JSR-250 1.1 API (as included in Java EE 6) not available - simply skip.
 		}
 		try {
+			// 向要包含的 过滤规则中 添加 Java EE 6 的 @Named 注解
 			this.includeFilters.add(new AnnotationTypeFilter(
 					((Class<? extends Annotation>) ClassUtils.forName("javax.inject.Named", cl)), false));
 			logger.trace("JSR-330 'javax.inject.Named' annotation found and supported for component scanning");
@@ -305,6 +311,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 	/**
 	 * Scan the class path for candidate components.
+	 * 扫包
 	 * @param basePackage the package to check for annotated classes
 	 * @return a corresponding Set of autodetected bean definitions
 	 */
@@ -371,6 +378,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	}
 
 	private Set<BeanDefinition> addCandidateComponentsFromIndex(CandidateComponentsIndex index, String basePackage) {
+		// 扫描到的 BeanDefinition 集合
 		Set<BeanDefinition> candidates = new LinkedHashSet<>();
 		try {
 			Set<String> types = new HashSet<>();
@@ -384,8 +392,11 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 			boolean traceEnabled = logger.isTraceEnabled();
 			boolean debugEnabled = logger.isDebugEnabled();
 			for (String type : types) {
+				// 为 制定资源 获取 元数据读取器，元数据读取器 通过 汇编（ASM）读取 资源的 元信息
 				MetadataReader metadataReader = getMetadataReaderFactory().getMetadataReader(type);
+				// 如果 扫描到的 类 符合 容器配置的 过滤规则
 				if (isCandidateComponent(metadataReader)) {
+					// 通过 汇编（ASM）读取 资源字节码中的 Bean 定义的 元信息
 					AnnotatedGenericBeanDefinition sbd = new AnnotatedGenericBeanDefinition(
 							metadataReader.getAnnotationMetadata());
 					if (isCandidateComponent(sbd)) {
@@ -414,6 +425,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	}
 
 	private Set<BeanDefinition> scanCandidateComponents(String basePackage) {
+		// 扫描到的 BeanDefinition 集合
 		Set<BeanDefinition> candidates = new LinkedHashSet<>();
 		try {
 			String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
@@ -484,20 +496,24 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	/**
 	 * Determine whether the given class does not match any exclude filter
 	 * and does match at least one include filter.
+	 * 判断 元信息读取器 读取的 类 是否 符合 容器定义的 注解过滤规则
 	 * @param metadataReader the ASM ClassReader for the class
 	 * @return whether the class qualifies as a candidate component
 	 */
 	protected boolean isCandidateComponent(MetadataReader metadataReader) throws IOException {
+		// 排除注解过滤规则
 		for (TypeFilter tf : this.excludeFilters) {
 			if (tf.match(metadataReader, getMetadataReaderFactory())) {
 				return false;
 			}
 		}
+		// 包含注解过滤规则
 		for (TypeFilter tf : this.includeFilters) {
 			if (tf.match(metadataReader, getMetadataReaderFactory())) {
 				return isConditionMatch(metadataReader);
 			}
 		}
+		// 默认返回 false
 		return false;
 	}
 
